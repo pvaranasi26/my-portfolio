@@ -38,7 +38,41 @@ function App() {
         }
       }, { threshold: 0.5 });
       kpiObserver.observe(kpiEl);
-      return () => { revealObserver.disconnect(); kpiObserver.disconnect(); };
+
+      // scroll-triggered entrance for skill quadrants (staggered)
+      const skillObs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            skillObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      document.querySelectorAll('.skill-quadrant').forEach((el, i) => {
+        el.style.animationDelay = `${i * 0.12}s`;
+        skillObs.observe(el);
+      });
+
+      // scroll-triggered entrance for cert cards (3-D flip staggered)
+      const certObs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            certObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      document.querySelectorAll('.cert-card').forEach((el, i) => {
+        el.style.animationDelay = `${i * 0.1}s`;
+        certObs.observe(el);
+      });
+
+      return () => {
+        revealObserver.disconnect();
+        kpiObserver.disconnect();
+        skillObs.disconnect();
+        certObs.disconnect();
+      };
     }
     return () => revealObserver.disconnect();
   }, []);
@@ -151,9 +185,13 @@ function App() {
       <section id="skills" className="skills-bg">
         <div className="section-label">02 — Competencies</div>
         <div className="section-title">Core <span>Technical Skills</span></div>
+        <div className="skills-intro">4 domains · 49 competencies across the Microsoft enterprise stack</div>
         <div className="skills-grid">
-          <div className="skill-quadrant pp">
-            <h3>▸ Power Platform Architecture</h3>
+          <div className="skill-quadrant pp" data-num="01">
+            <div className="skill-quadrant-head">
+              <h3>▸ Power Platform Architecture</h3>
+              <span className="skill-count">14 skills</span>
+            </div>
             <div className="skill-tag-cloud">
               <span className="skill-tag">Power Apps Canvas</span>
               <span className="skill-tag">Power Apps Model-Driven</span>
@@ -171,8 +209,11 @@ function App() {
               <span className="skill-tag">Deployment Pipelines</span>
             </div>
           </div>
-          <div className="skill-quadrant sp">
-            <h3>▸ SharePoint &amp; M365</h3>
+          <div className="skill-quadrant sp" data-num="02">
+            <div className="skill-quadrant-head">
+              <h3>▸ SharePoint &amp; M365</h3>
+              <span className="skill-count">13 skills</span>
+            </div>
             <div className="skill-tag-cloud">
               <span className="skill-tag">SharePoint Online</span>
               <span className="skill-tag">SPFx Web Parts</span>
@@ -189,8 +230,11 @@ function App() {
               <span className="skill-tag">Document IDs &amp; Sets</span>
             </div>
           </div>
-          <div className="skill-quadrant az">
-            <h3>▸ Azure &amp; Integration</h3>
+          <div className="skill-quadrant az" data-num="03">
+            <div className="skill-quadrant-head">
+              <h3>▸ Azure &amp; Integration</h3>
+              <span className="skill-count">10 skills</span>
+            </div>
             <div className="skill-tag-cloud">
               <span className="skill-tag">Azure Databricks</span>
               <span className="skill-tag">Azure AD / Entra ID</span>
@@ -204,8 +248,11 @@ function App() {
               <span className="skill-tag">Private Endpoints</span>
             </div>
           </div>
-          <div className="skill-quadrant dev">
-            <h3>▸ Development Background</h3>
+          <div className="skill-quadrant dev" data-num="04">
+            <div className="skill-quadrant-head">
+              <h3>▸ Development Background</h3>
+              <span className="skill-count">12 skills</span>
+            </div>
             <div className="skill-tag-cloud">
               <span className="skill-tag">C#</span>
               <span className="skill-tag">ASP.NET</span>
@@ -317,25 +364,30 @@ function App() {
         <div className="section-label">04 — Credentials</div>
         <div className="section-title">Certifications &amp; <span>Education</span></div>
         <div className="certs-grid">
-          <div className="cert-card">
-            <div className="cert-name">Microsoft Certified Solution Expert (MCSE) — SharePoint</div>
-            <div className="cert-status">✓ Active</div>
+          <div className="cert-card featured">
+            <div className="cert-badge">MCSE</div>
+            <div className="cert-name">Microsoft Certified Solution Expert — SharePoint</div>
+            <div className="cert-status active">Active credential</div>
           </div>
           <div className="cert-card">
+            <div className="cert-badge">CSM</div>
             <div className="cert-name">Certified ScrumMaster (CSM)</div>
-            <div className="cert-status">✓ June 2024</div>
+            <div className="cert-status">June 2024</div>
           </div>
           <div className="cert-card">
+            <div className="cert-badge">MCTS</div>
             <div className="cert-name">MCTS — SharePoint 2010 App Dev &amp; Config (70-573 / 70-667)</div>
-            <div className="cert-status">✓ Completed</div>
+            <div className="cert-status">Completed</div>
           </div>
           <div className="cert-card">
+            <div className="cert-badge">MCTS</div>
             <div className="cert-name">MCTS — .NET Framework &amp; HTML5/JS/CSS3 (70-536 / 70-480)</div>
-            <div className="cert-status">✓ Completed</div>
+            <div className="cert-status">Completed</div>
           </div>
           <div className="cert-card">
+            <div className="cert-badge">MCTS</div>
             <div className="cert-name">MCTS — SQL Server &amp; Workflow Foundation (70-433 / 70-504)</div>
-            <div className="cert-status">✓ Completed</div>
+            <div className="cert-status">Completed</div>
           </div>
         </div>
         <div style={{marginTop: '48px'}}>

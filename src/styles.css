@@ -475,59 +475,167 @@ section + section {
 }
 
 /* ── SKILLS ──────────────────────────────────────── */
-.skills-bg { background: rgba(7, 15, 30, 0.88); }
+.skills-bg {
+  background: rgba(7, 15, 30, 0.9);
+  position: relative;
+}
+.skills-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 10% 50%, rgba(26,95,168,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 55% at 90% 50%, rgba(200,145,58,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.skills-intro {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--subtext);
+  letter-spacing: 0.1em;
+  margin-top: -44px;
+  margin-bottom: 52px;
+}
 
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2px;
-  background: rgba(200,145,58,0.07);
-  border: 1px solid rgba(200,145,58,0.07);
+  background: rgba(200,145,58,0.12);
+  border: 1px solid rgba(200,145,58,0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .skill-quadrant {
   padding: 44px 48px;
-  background: rgba(9, 20, 38, 0.92);
+  background: rgba(9, 20, 38, 0.95);
   position: relative;
-  transition: all 0.25s var(--easing);
+  overflow: hidden;
+  opacity: 0;
+  transition: background 0.25s var(--easing), box-shadow 0.25s var(--easing);
+}
+
+/* large watermark number in the background */
+.skill-quadrant::before {
+  content: attr(data-num);
+  position: absolute;
+  bottom: 8px;
+  right: 20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 6rem;
+  font-weight: 300;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.4s var(--easing);
+}
+.skill-quadrant.pp::before { color: rgba(36,120,204,0.09); }
+.skill-quadrant.sp::before { color: rgba(232,184,109,0.08); }
+.skill-quadrant.az::before { color: rgba(93,207,222,0.09); }
+.skill-quadrant.dev::before { color: rgba(148,168,188,0.09); }
+
+/* coloured top accent line on hover */
+.skill-quadrant::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--easing);
+}
+.skill-quadrant.pp::after { background: linear-gradient(90deg, var(--steel2), transparent); }
+.skill-quadrant.sp::after { background: linear-gradient(90deg, var(--gold2), transparent); }
+.skill-quadrant.az::after { background: linear-gradient(90deg, #5dcfde, transparent); }
+.skill-quadrant.dev::after { background: linear-gradient(90deg, var(--gray2), transparent); }
+
+.skill-quadrant.in-view {
+  animation: quadrantReveal 0.6s var(--easing) forwards;
 }
 .skill-quadrant:hover {
-  background: rgba(12, 25, 50, 0.97);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card);
+  background: rgba(12, 26, 52, 0.98);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(200,145,58,0.06);
   z-index: 1;
+}
+.skill-quadrant:hover::after { transform: scaleX(1); }
+
+.skill-quadrant-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
 }
 
 .skill-quadrant h3 {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.32rem;
+  font-size: 1.28rem;
   font-weight: 400;
-  margin-bottom: 24px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
   letter-spacing: 0.01em;
+  margin: 0;
 }
 .skill-quadrant.pp h3 { color: var(--steel2); }
 .skill-quadrant.sp h3 { color: var(--gold2); }
 .skill-quadrant.az h3 { color: #5dcfde; }
 .skill-quadrant.dev h3 { color: var(--gray2); }
 
+.skill-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--subtext);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  padding: 3px 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 .skill-tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* tags start invisible and wave in when quadrant is in-view */
 .skill-tag {
   font-size: 0.71rem;
-  padding: 4px 10px;
+  padding: 5px 11px;
   background: rgba(255,255,255,0.035);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 2px;
   color: var(--subtext);
   font-weight: 400;
-  transition: all 0.18s var(--easing);
   cursor: default;
+  opacity: 0;
+  transform: translateY(7px) scale(0.94);
+  transition:
+    opacity 0.34s var(--easing),
+    transform 0.34s var(--easing),
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s;
 }
+.skill-quadrant.in-view .skill-tag { opacity: 1; transform: none; }
+
+/* wave-in stagger delays */
+.skill-quadrant.in-view .skill-tag:nth-child(1)  { transition-delay: 0.26s; }
+.skill-quadrant.in-view .skill-tag:nth-child(2)  { transition-delay: 0.31s; }
+.skill-quadrant.in-view .skill-tag:nth-child(3)  { transition-delay: 0.36s; }
+.skill-quadrant.in-view .skill-tag:nth-child(4)  { transition-delay: 0.41s; }
+.skill-quadrant.in-view .skill-tag:nth-child(5)  { transition-delay: 0.46s; }
+.skill-quadrant.in-view .skill-tag:nth-child(6)  { transition-delay: 0.51s; }
+.skill-quadrant.in-view .skill-tag:nth-child(7)  { transition-delay: 0.56s; }
+.skill-quadrant.in-view .skill-tag:nth-child(8)  { transition-delay: 0.61s; }
+.skill-quadrant.in-view .skill-tag:nth-child(9)  { transition-delay: 0.66s; }
+.skill-quadrant.in-view .skill-tag:nth-child(10) { transition-delay: 0.71s; }
+.skill-quadrant.in-view .skill-tag:nth-child(11) { transition-delay: 0.76s; }
+.skill-quadrant.in-view .skill-tag:nth-child(12) { transition-delay: 0.81s; }
+.skill-quadrant.in-view .skill-tag:nth-child(13) { transition-delay: 0.86s; }
+.skill-quadrant.in-view .skill-tag:nth-child(14) { transition-delay: 0.91s; }
+
 .skill-tag:hover {
-  background: rgba(200,145,58,0.08);
-  border-color: rgba(200,145,58,0.28);
+  background: rgba(200,145,58,0.1);
+  border-color: rgba(200,145,58,0.35);
   color: var(--gold2);
 }
 
@@ -661,44 +769,105 @@ section + section {
 .certs-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  background: rgba(200,145,58,0.07);
+  gap: 16px;
 }
 
 .cert-card {
-  padding: 28px;
+  padding: 28px 28px 24px;
   background: rgba(9, 20, 38, 0.92);
+  border: 1px solid rgba(255,255,255,0.06);
   border-top: 2px solid var(--gold);
+  border-radius: 2px;
   position: relative;
-  transition: all 0.25s var(--easing);
+  overflow: hidden;
   opacity: 0;
-  animation: scaleIn 0.5s var(--easing) forwards;
+  transition:
+    background 0.25s var(--easing),
+    box-shadow 0.25s var(--easing),
+    border-top-color 0.25s var(--easing),
+    transform 0.25s var(--easing);
 }
-.cert-card:nth-child(1) { animation-delay: 0.1s; }
-.cert-card:nth-child(2) { animation-delay: 0.2s; }
-.cert-card:nth-child(3) { animation-delay: 0.3s; }
-.cert-card:nth-child(4) { animation-delay: 0.4s; }
-.cert-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* shimmer sweep on top border */
+.cert-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  transition: left 0.55s ease;
+}
+.cert-card:hover::before { left: 160%; }
+
+.cert-card.in-view {
+  animation: certReveal 0.65s var(--easing) forwards;
+}
+
+.cert-card.featured {
+  border-top-color: var(--gold2);
+  background: rgba(12, 26, 52, 0.94);
+  box-shadow: 0 0 0 1px rgba(200,145,58,0.1);
+}
 
 .cert-card:hover {
-  transform: translateY(-4px);
   background: rgba(14, 30, 58, 0.97);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.32), 0 0 0 1px rgba(200,145,58,0.15);
   border-top-color: var(--gold2);
+  transform: translateY(-5px);
   z-index: 1;
 }
+
+/* abbreviated badge label */
+.cert-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(200,145,58,0.08);
+  border: 1px solid rgba(200,145,58,0.2);
+  padding: 3px 9px;
+  border-radius: 2px;
+  margin-bottom: 14px;
+}
+.cert-card.featured .cert-badge {
+  color: var(--gold2);
+  background: rgba(200,145,58,0.13);
+  border-color: rgba(200,145,58,0.32);
+}
+
 .cert-name {
   font-size: 0.875rem;
   color: var(--text);
   font-weight: 500;
-  margin-bottom: 12px;
-  line-height: 1.5;
+  margin-bottom: 16px;
+  line-height: 1.55;
 }
+.cert-card.featured .cert-name { color: var(--white); font-size: 0.91rem; }
+
 .cert-status {
-  font-size: 0.67rem;
-  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-family: 'DM Mono', monospace;
+  font-size: 0.64rem;
+  color: var(--subtext);
   letter-spacing: 0.1em;
+}
+.cert-status::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gray3);
+  flex-shrink: 0;
+}
+.cert-status.active { color: #4ade80; }
+.cert-status.active::before {
+  background: #4ade80;
+  box-shadow: 0 0 7px rgba(74,222,128,0.55);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 /* ── EDUCATION ───────────────────────────────────── */
@@ -868,6 +1037,14 @@ footer span:first-child { color: var(--gold2); }
   from { opacity: 0; transform: scale(0.96); }
   to   { opacity: 1; transform: scale(1); }
 }
+@keyframes quadrantReveal {
+  from { opacity: 0; transform: translateY(22px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes certReveal {
+  from { opacity: 0; transform: perspective(700px) rotateX(14deg) translateY(18px); }
+  to   { opacity: 1; transform: perspective(700px) rotateX(0deg) translateY(0); }
+}
 @keyframes floatOrb {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33%       { transform: translate(14px, -18px) scale(1.02); }
@@ -920,10 +1097,12 @@ footer span:first-child { color: var(--gold2); }
 
   .about-highlights { gap: 2px; }
 
+  .skills-intro { margin-top: -32px; margin-bottom: 36px; }
   .skills-grid { grid-template-columns: 1fr; }
   .skill-quadrant { padding: 32px 28px; }
+  .skill-quadrant-head { flex-wrap: wrap; gap: 8px; }
 
-  .certs-grid { grid-template-columns: 1fr; gap: 2px; }
+  .certs-grid { grid-template-columns: 1fr; gap: 10px; }
 
   .edu-card { flex-direction: column; gap: 20px; padding: 28px; }
 
