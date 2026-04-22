@@ -1,20 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 
 function App() {
   const [revealElements, setRevealElements] = useState(new Set());
+  const [kpi, setKpi] = useState({ years: 0, sites: 0, pp: 0, awards: 0 });
+  const kpiStarted = useRef(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
+    const revealObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           setRevealElements(prev => new Set([...prev, entry.target]));
         }
       });
     }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-    return () => observer.disconnect();
+    const kpiEl = document.querySelector('.hero-kpi-grid');
+    if (kpiEl) {
+      const kpiObserver = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !kpiStarted.current) {
+          kpiStarted.current = true;
+          const duration = 1800;
+          const start = Date.now();
+          const targets = { years: 17, sites: 3, pp: 4, awards: 3 };
+          const tick = () => {
+            const p = Math.min((Date.now() - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            setKpi({
+              years: Math.floor(eased * targets.years),
+              sites: Math.floor(eased * targets.sites),
+              pp: Math.floor(eased * targets.pp),
+              awards: Math.floor(eased * targets.awards),
+            });
+            if (p < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      }, { threshold: 0.5 });
+      kpiObserver.observe(kpiEl);
+      return () => { revealObserver.disconnect(); kpiObserver.disconnect(); };
+    }
+    return () => revealObserver.disconnect();
   }, []);
 
   const scrollToSection = (id) => {
@@ -38,13 +64,14 @@ function App() {
 
       {/* HERO */}
       <section className="hero" id="top">
+        <div className="hero-geo" aria-hidden="true" />
         <div className="hero-main">
           <div className="hero-content">
             <div className="hero-tag">Power Platform Architect</div>
             <h1>Pradeep Kumar<br/><em>Varanasi</em></h1>
             <p className="hero-sub">
-              Senior Microsoft technology architect with <strong>17+ years</strong> delivering enterprise solutions 
-              across banking, energy, and oil &amp; gas. Specialized in Power Platform architecture, 
+              Senior Microsoft technology architect with <strong>17+ years</strong> delivering enterprise solutions
+              across banking, energy, and oil &amp; gas. Specialized in Power Platform architecture,
               SharePoint modernization, and Azure integration.
             </p>
             <div className="hero-badges">
@@ -64,11 +91,27 @@ function App() {
             <img src="/profile.jpg" alt="Pradeep Kumar Varanasi" className="profile-circle"/>
           </div>
         </div>
-        <div className="hero-stats">
-          <div className="stat"><div className="stat-num">17+</div><div className="stat-label">Years</div></div>
-          <div className="stat"><div className="stat-num">3K+</div><div className="stat-label">Sites Migrated</div></div>
-          <div className="stat"><div className="stat-num">4+</div><div className="stat-label">Power Platform</div></div>
-          <div className="stat"><div className="stat-num">3</div><div className="stat-label">Awards</div></div>
+        <div className="hero-kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-value">{kpi.years}+</div>
+            <div className="kpi-label">Years Experience</div>
+            <div className="kpi-sub">Enterprise delivery</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-value">{kpi.sites}K+</div>
+            <div className="kpi-label">Sites Migrated</div>
+            <div className="kpi-sub">Zero data loss</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-value">{kpi.pp}+</div>
+            <div className="kpi-label">Power Platform</div>
+            <div className="kpi-sub">Years architecting</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-value">{kpi.awards}</div>
+            <div className="kpi-label">Industry Awards</div>
+            <div className="kpi-sub">Best Performer · Star</div>
+          </div>
         </div>
       </section>
 
@@ -83,25 +126,25 @@ function App() {
             <p>Architected solutions adopted as <strong>reference architecture by enterprise teams</strong>. Trusted by enterprise architects and business leadership to own end-to-end decisions from POC through production.</p>
             <p>Currently leveraging <strong>Copilot in Power Apps</strong> via Power Apps Premium license for AI-assisted app building and Dataverse natural language queries.</p>
           </div>
-            <div className="about-highlights">
-              <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card')) ? 'visible' : ''}`}>
-                <h4>SharePoint Modernization</h4>
-                <p>Leading migration of ~2,500 site collections at FHN. Previously led 400-site migration at LG&amp;E. Zero data loss. Banking-grade compliance.</p>
-              </div>
-              <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card:nth-child(2)')) ? 'visible' : ''}`}>
-                <h4>Power Platform Architecture</h4>
-                <p>Architected enterprise Audit Risk Assessment Platform (Power Apps, Power Automate, Dataverse) — adopted as FHN reference architecture for future projects.</p>
-              </div>
-              <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card:nth-child(3)')) ? 'visible' : ''}`}>
-                <h4>Azure &amp; Databricks Integration</h4>
-                <p>Evaluated Power Platform → Azure Databricks connectivity via VNet, private endpoints, service principal. Recommendation adopted org-wide.</p>
-              </div>
-              <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card:nth-child(4)')) ? 'visible' : ''}`}>
-                <h4>Team Leadership</h4>
-                <p>Led 10–12 person onsite/offshore delivery teams at M&amp;T Bank and Chevron. Best Performer and Star Performance award recipient.</p>
-              </div>
+          <div className="about-highlights">
+            <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card')) ? 'visible' : ''}`}>
+              <h4>SharePoint Modernization</h4>
+              <p>Leading migration of ~2,500 site collections at FHN. Previously led 400-site migration at LG&amp;E. Zero data loss. Banking-grade compliance.</p>
+            </div>
+            <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card:nth-child(2)')) ? 'visible' : ''}`}>
+              <h4>Power Platform Architecture</h4>
+              <p>Architected enterprise Audit Risk Assessment Platform (Power Apps, Power Automate, Dataverse) — adopted as FHN reference architecture for future projects.</p>
+            </div>
+            <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card:nth-child(3)')) ? 'visible' : ''}`}>
+              <h4>Azure &amp; Databricks Integration</h4>
+              <p>Evaluated Power Platform → Azure Databricks connectivity via VNet, private endpoints, service principal. Recommendation adopted org-wide.</p>
+            </div>
+            <div className={`highlight-card reveal ${revealElements.has(document.querySelector('.highlight-card:nth-child(4)')) ? 'visible' : ''}`}>
+              <h4>Team Leadership</h4>
+              <p>Led 10–12 person onsite/offshore delivery teams at M&amp;T Bank and Chevron. Best Performer and Star Performance award recipient.</p>
             </div>
           </div>
+        </div>
       </section>
 
       {/* SKILLS */}
